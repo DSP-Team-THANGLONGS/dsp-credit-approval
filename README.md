@@ -22,7 +22,7 @@ I. The bank has collected sufficient application and credit records. II. Machine
 # **Data Pre-processing** 
 1. Data from `application\_record.csv` and `credit\_record.csv` is merged based on the Client ID. 
 1. Features such as 'good' or 'bad' client labels are engineered, possibly using techniques like vintage analysis. 
-# ` `**Model Development** 
+# **Model Development** 
 1. As data scientists, we would employ traditional logistic models as a baseline. 
 1. Also, advanced machine learning algorithms (e.g., Boosting, Random Forest, SVM) are trained to refine predictions. 
 
@@ -38,18 +38,18 @@ I. The bank has collected sufficient application and credit records. II. Machine
 
 
 
-**5. Postconditions:** 
+# **Postconditions:** 
 
 1. Applicants are either granted or denied credit based on the model’s predictions. 
 1. Continuous learning ensures the model evolves with changing economic conditions and application trends. 
 
 
-6. # **Exception** 
+# **Exception** 
 I. 	If economic conditions shift drastically, manual review or adjustment may be necessary to ensure model reliability. 
 
 
 
-**7. Note:** 
+# **Note:** 
 
 I. 	Handling imbalanced data will be crucial for accurate prediction. Techniques such as oversampling, under-sampling, or synthetic data generation might be needed. 
 
