@@ -1,28 +1,35 @@
 from typing import Union
 from fastapi import FastAPI
-import sklearn
-from sklearn.ensemble import RandomForestClassifier
 import pickle
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
+import pandas as pd
 
 app = FastAPI()
 scaler = StandardScaler()
 ordinal_encoder = OrdinalEncoder()
 onehot_encoder = OneHotEncoder()
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+dataset = pd.read_csv('../data/application_record.csv').drop('ID', axis=1)
+print(dataset)
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.get('/get-columns')
+def get_column_names():
+    return dataset.columns.tolist()
 
-@app.post("/predict")
+
+@app.get('/get-features/{columns}')
+def get_features(columns: str):
+    return dataset[columns].unique().tolist()
+
+
+@app.post('/predict')
 def make_predictions(features: list):
-    #load model
-    model_path = "../output_model/model.sav"
-    loaded_model = pickle.load(open(model_path, "rb"))
+    # load model
+    model_path = '../output_model/model.sav'
+    loaded_model = pickle.load(open(model_path, 'rb'))
 
     return loaded_model.predict(features)
+
+
+# @app.get('past-predictions')
+# def get_past_predictions():
