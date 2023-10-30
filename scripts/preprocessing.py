@@ -17,8 +17,9 @@ def select_core_columns(data: pd.DataFrame) -> pd.DataFrame:
         "DAYS_EMPLOYED",
         "OCCUPATION_TYPE",
         "CNT_FAM_MEMBERS",
-        "APPROVED",
     ]
+    if "APPROVED" in data.columns:
+        core_columns.append["APPROVED"]
     return data[core_columns]
 
 
@@ -48,6 +49,8 @@ def load_or_fit_onehot_encoder(data: pd.DataFrame) -> OneHotEncoder:
         "NAME_EDUCATION_TYPE",
         "NAME_HOUSING_TYPE",
         "OCCUPATION_TYPE",
+        "FLAG_OWN_CAR",
+        "FLAG_OWN_REALTY",
     ]
     params = {"handle_unknown": "ignore"}
     return load_or_fit_encoder(
@@ -114,6 +117,8 @@ def transform_data(data: pd.DataFrame, onehot_encoder, scaler) -> pd.DataFrame:
         "NAME_EDUCATION_TYPE",
         "NAME_HOUSING_TYPE",
         "OCCUPATION_TYPE",
+        "FLAG_OWN_CAR",
+        "FLAG_OWN_REALTY",
     ]
     data = encode_onehot(data, onehot_cols, onehot_encoder)
     scale_cols = [
@@ -123,8 +128,6 @@ def transform_data(data: pd.DataFrame, onehot_encoder, scaler) -> pd.DataFrame:
         "CNT_FAM_MEMBERS",
     ]
     data = scale_features(data, scale_cols, scaler)
-    map_cols = ["FLAG_OWN_CAR", "FLAG_OWN_REALTY"]
-    data = map_values(data, map_cols, {"Y": 1, "N": 0})
     return data
 
 
@@ -133,6 +136,9 @@ def features_preprocessing(data: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     onehot_encoder, scaler = load_encoder_scaler(data)
     data = transform_data(data, onehot_encoder, scaler)
 
-    features = data.drop("APPROVED", axis=1)
-    target = data[["APPROVED"]]
-    return features, target
+    if "APPROVED" in data.columns:
+        features = data.drop("APPROVED", axis=1)
+        target = data[["APPROVED"]]
+        return features, target
+    else:
+        return data, pd.DataFrame([])
