@@ -12,6 +12,9 @@ dataset = pd.read_csv('../data/application_record.csv').drop('ID', axis=1)
 print(dataset)
 
 
+def save_predict(data: pd.DataFrame) -> bool:
+
+
 @app.get('/get-columns')
 def get_column_names():
     return dataset.columns.tolist()
@@ -27,9 +30,11 @@ def make_predictions(features: list):
     # load model
     model_path = '../output_model/model.sav'
     loaded_model = pickle.load(open(model_path, 'rb'))
+    result = loaded_model.predict(features)
+    save_predict()
+    return 
 
-    return loaded_model.predict(features)
 
-
-# @app.get('past-predictions')
-# def get_past_predictions():
+@app.get('past-predictions')
+def get_past_predictions():
+    pass
