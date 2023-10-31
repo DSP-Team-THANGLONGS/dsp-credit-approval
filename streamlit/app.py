@@ -9,11 +9,12 @@ def main():
         "Please fill out the following form to check your eligibility for a credit card."
     )
  
+
     # Question 1
     st.write("Do you own a car?")
     car_options = ["Yes", "No"]
     car = st.radio("Select an option", car_options, key="radio1")
- 
+
     # Question 2
     st.write("Do you own any piece of real estate?")
     real_estate_options = ["Yes", "No"]
@@ -25,6 +26,7 @@ def main():
     st.write("What is your birthday?")
     birthday = st.date_input("Calendar", datetime.date(1999, 11, 12))
  
+
     # Question 3
     st.write(" Do you have children?")
     children_options = ["Yes", "No"]
@@ -162,4 +164,3 @@ def main():
  
 if __name__ == "__main__":
     main()
- 
