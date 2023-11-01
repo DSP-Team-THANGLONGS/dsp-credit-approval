@@ -1,14 +1,15 @@
+# BEGIN: 3j4k5l6m7n8o
 import streamlit as st
 import json
 import datetime
- 
- 
+import requests
+
+
 def main():
     st.title("Credit Card Approval Form")
     st.write(
         "Please fill out the following form to check your eligibility for a credit card."
     )
- 
 
     # Question 1
     st.write("Do you own a car?")
@@ -21,11 +22,10 @@ def main():
     real_estate = st.radio(
         "Select an option", real_estate_options, key="radio2"
     )
- 
+
     # Question Birthday
     st.write("What is your birthday?")
     birthday = st.date_input("Calendar", datetime.date(1999, 11, 12))
- 
 
     # Question 3
     st.write(" Do you have children?")
@@ -38,13 +38,13 @@ def main():
         children_count = st.selectbox(
             "Select an option", children_count_options, key="select1"
         )
- 
+
     # Question 5
     st.write("What is your yearly income?")
     income = st.number_input(
         "Enter your yearly income", min_value=0.0, format="%f", key="number1"
     )
- 
+
     # Question 6
     st.write("What is your source of income?")
     income_type_options = [
@@ -57,7 +57,7 @@ def main():
     income_type = st.selectbox(
         "Select an option", income_type_options, key="select2"
     )
- 
+
     st.write("Are you still working?")
     working_options = ["Yes", "No"]
     isWorking = st.radio("Select an option", working_options, key="radio4")
@@ -67,7 +67,7 @@ def main():
     else:
         st.write("The day you stop working?")
         workday = st.date_input("Calendar", datetime.date(2020, 10, 20))
- 
+
     st.write("What is your working domain?")
     occupation_options = [
         "Other",
@@ -93,7 +93,7 @@ def main():
     occupation = st.selectbox(
         "Select an option", occupation_options, key="select3"
     )
- 
+
     # Question 7
     st.write("What is your education level?")
     education_options = [
@@ -106,7 +106,7 @@ def main():
     education = st.selectbox(
         "Select an option", education_options, key="select4"
     )
- 
+
     # Question 8
     st.write("What is your marital status?")
     marital_status_options = [
@@ -119,7 +119,7 @@ def main():
     marital_status = st.selectbox(
         "Select an option", marital_status_options, key="select5"
     )
- 
+
     # Question 9
     st.write("What is your housing situation?")
     housing_options = [
@@ -131,14 +131,14 @@ def main():
         "Office apartment",
     ]
     housing = st.selectbox("Select an option", housing_options, key="select6")
- 
+
     # Question 10
     st.write("How many members are there in your family?")
     family_members_options = list(range(1, 21))
     family_members = st.selectbox(
         "Select an option", family_members_options, key="select7"
     )
- 
+
     if st.button("Submit prediction", type="primary"):
         birthday_calc = birthday - datetime.date.today()
         employed_calc = (
@@ -159,8 +159,23 @@ def main():
             "OCCUPATION_TYPE": occupation,
             "CNT_FAM_MEMBERS": family_members,
         }
-        print(data)
- 
- 
+
+        res = requests.post(
+            "http://127.0.0.1:8000/predict", data=json.dumps(data)
+        )
+        input_list = (res.text).strip("[]").split(",")
+        result_list = [
+            int(item.strip('"'))
+            if item.strip('"').isdigit()
+            else float(item.strip('"'))
+            if "." in item
+            else item.strip('"')
+            for item in input_list
+        ]
+        is_good_applicant = "good" if result_list[0] == 1 else "bad"
+        result = f"This profile is a {is_good_applicant} applicants"
+        st.subheader(result)
+
+
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 import pandas as pd
 import pickle
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -13,9 +13,12 @@ def build_model(data: pd.DataFrame) -> dict[str, str]:
     )
     train_set_features, train_set_target = features_preprocessing(train_set)
     val_set_features, val_set_target = features_preprocessing(val_set)
+
     # model = SVC(gamma="auto", kernel="sigmoid")
     model = RandomForestClassifier(
-        criterion="entropy", max_depth=5, n_estimators=150
+        criterion="entropy",
+        max_depth=8,
+        n_estimators=150,
     )
     model.fit(train_set_features, train_set_target)
     with open("../output_model/model.pkl", "wb") as f:
