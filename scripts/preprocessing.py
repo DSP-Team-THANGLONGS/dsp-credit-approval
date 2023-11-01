@@ -19,7 +19,7 @@ def select_core_columns(data: pd.DataFrame) -> pd.DataFrame:
         "CNT_FAM_MEMBERS",
     ]
     if "APPROVED" in data.columns:
-        core_columns.append["APPROVED"]
+        core_columns.append("APPROVED")
     return data[core_columns]
 
 
@@ -135,7 +135,6 @@ def features_preprocessing(data: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     data = select_core_columns(data)
     onehot_encoder, scaler = load_encoder_scaler(data)
     data = transform_data(data, onehot_encoder, scaler)
-
     if "APPROVED" in data.columns:
         features = data.drop("APPROVED", axis=1)
         target = data[["APPROVED"]]

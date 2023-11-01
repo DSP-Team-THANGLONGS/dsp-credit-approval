@@ -35,12 +35,11 @@ def make_predictions(features: dict):
     loaded_model = pickle.load(open(model_path, "rb"))
     converted_ft = pd.DataFrame([features])
     processed_ft, _ = features_preprocessing(converted_ft)
-    result = loaded_model.predict(processed_ft)
     proba = loaded_model.predict_proba(processed_ft)
-    processed_ft["PROBA"] = proba
+    result = [1 if max(proba[0]) > 0.65 else 0]
     processed_ft["RESULT"] = result
     save_predict(processed_ft)
-    return str(result[0]), str(max(proba[0]))
+    return str(result[0])
 
 
 @app.get("past-predictions")
