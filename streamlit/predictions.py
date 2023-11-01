@@ -1,5 +1,6 @@
 import streamlit as st
 import psycopg2
+import pandas as pd
 
 conn = psycopg2.connect(
     host="localhost",
@@ -8,20 +9,15 @@ conn = psycopg2.connect(
     password="mypassword"
 )
 
-def fetch_table(table_name):
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table_name}")
-    rows = cur.fetchall()
-    return rows
+cur = conn.cursor()
 
-def app():
-    st.title("Table Viewer")
-    
-    table_name = st.text_input("Past predictions:")
-    
-    if table_name:
-        rows = fetch_table(table_name)
-        if rows:
-            st.table(rows)
-        else:
-            st.write("No rows found.")
+cur.execute("SELECT * FROM mytable")
+
+rows = cur.fetchall()
+
+df = pd.DataFrame(rows, columns=[desc[0] for desc in cur.description])
+
+cur.close()
+conn.close()
+
+st.table(df)
