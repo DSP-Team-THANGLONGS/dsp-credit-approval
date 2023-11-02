@@ -5,6 +5,7 @@ from typing import Union
 from fastapi import FastAPI, Depends
 import pickle
 import pandas as pd
+import numpy as np
 from scripts.preprocessing import features_preprocessing
 from database.database import SessionLocal, engine
 from database import crud, models, schemas
@@ -32,6 +33,15 @@ async def save_predict(
 ) -> bool:
     date_prediction = datetime.date.today()
     date_prediction = date_prediction.strftime("%Y-%m-%d")
+    today = datetime.datetime.now().date()
+    birthday = today - datetime.timedelta(
+        days=int(np.abs(data["DAYS_BIRTH"].values[0]))
+    )
+    employed_day = today - datetime.timedelta(
+        days=int(np.abs(data["DAYS_EMPLOYED"].values[0]))
+    )
+
+    still_working = True if data["DAYS_EMPLOYED"].values[0] < 0 else False
     record = {
         "own_car": data["FLAG_OWN_CAR"].values[0],
         "own_realty": data["FLAG_OWN_REALTY"].values[0],
@@ -39,8 +49,9 @@ async def save_predict(
         "education": data["NAME_EDUCATION_TYPE"].values[0],
         "family_status": data["NAME_FAMILY_STATUS"].values[0],
         "housing_type": data["NAME_HOUSING_TYPE"].values[0],
-        "birthday": data["DAYS_BIRTH"].values[0],
-        "employed_day": data["DAYS_EMPLOYED"].values[0],
+        "birthday": birthday,
+        "employed_day": employed_day,
+        "still_working": still_working,
         "occupation": data["OCCUPATION_TYPE"].values[0],
         "fam_members": data["CNT_FAM_MEMBERS"].values[0],
         "result": data["RESULT"].values[0],

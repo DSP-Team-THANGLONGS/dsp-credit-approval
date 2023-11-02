@@ -24,6 +24,7 @@ def save_record(db: Session, record: dict):
         birthday=record["birthday"],
         employed_day=record["employed_day"],
         occupation=record["occupation"],
+        still_working=record["still_working"],
         fam_members=record["fam_members"],
         result=record["result"],
         date_prediction=record["date_prediction"],
