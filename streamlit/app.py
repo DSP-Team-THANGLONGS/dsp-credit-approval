@@ -28,17 +28,17 @@ def predict():
     st.write("What is your birthday?")
     birthday = st.date_input("Calendar", datetime.date(1999, 11, 12))
 
-    # Question 3
-    st.write(" Do you have children?")
-    children_options = ["Yes", "No"]
-    children = st.radio("Select an option", children_options, key="radio3")
-    children_count = 0
-    if children == "Yes":
-        st.write("How many children do you have?")
-        children_count_options = list(range(11))
-        children_count = st.selectbox(
-            "Select an option", children_count_options, key="select1"
-        )
+    # # Question 3
+    # st.write(" Do you have children?")
+    # children_options = ["Yes", "No"]
+    # children = st.radio("Select an option", children_options, key="radio3")
+    # children_count = 0
+    # if children == "Yes":
+    #     st.write("How many children do you have?")
+    #     children_count_options = list(range(11))
+    #     children_count = st.selectbox(
+    #         "Select an option", children_count_options, key="select1"
+    #     )
 
     # Question 5
     st.write("What is your yearly income?")
@@ -186,21 +186,27 @@ def past_predictions():
     df = pd.DataFrame(data)
     # Rename columns
     column_mapping = {
-        "own_car": "FLAG_OWN_CAR",
-        "own_realty": "FLAG_OWN_REALTY",
-        "income": "AMT_INCOME_TOTAL",
-        "family_status": "NAME_FAMILY_STATUS",
-        "result": "NAME_INCOME_TYPE",
-        "education": "NAME_EDUCATION_TYPE",
-        "housing_type": "NAME_HOUSING_TYPE",
-        "birthday": "DAYS_BIRTH",
-        "employed_day": "DAYS_EMPLOYED",
-        "occupation": "OCCUPATION_TYPE",
-        "fam_members": "CNT_FAM_MEMBERS",
-        "result": "RESULT",
+        "date_prediction": "date prediction",
+        "own_car": "Car Owner",
+        "own_realty": "Realty Owner",
+        "income": "Income Total",
+        "family_status": "Family Status",
+        "education": "Eductation",
+        "housing_type": "Housing Type",
+        "birthday": "Birthday",
+        "employed_day": "Employed day",
+        "occupation": "Occupation",
+        "fam_members": "Family member",
+        "result": "Result",
     }
     df.rename(columns=column_mapping, inplace=True)
-    st.table(df if "df" in locals() else pd.DataFrame())
+    df = df[column_mapping.values()]
+    df["Result"] = df["Result"].replace({1: "Good", 0: "Bad"})
+
+    if not df.empty:
+        st.table(df)
+    else:
+        st.write("No data available.")
 
 
 if __name__ == "__main__":
