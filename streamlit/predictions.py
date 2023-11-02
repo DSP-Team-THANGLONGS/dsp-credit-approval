@@ -1,27 +1,34 @@
 import streamlit as st
-import psycopg2
+import requests
+import pandas as pd
 
-conn = psycopg2.connect(
-    host="localhost",
-    database="mydatabase",
-    user="myusername",
-    password="mypassword"
-)
-
-def fetch_table(table_name):
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table_name}")
-    rows = cur.fetchall()
-    return rows
 
 def app():
     st.title("Table Viewer")
-    
-    table_name = st.text_input("Past predictions:")
-    
-    if table_name:
-        rows = fetch_table(table_name)
-        if rows:
-            st.table(rows)
-        else:
-            st.write("No rows found.")
+
+    st.write("Past predictions:")
+
+    res = requests.get("http://127.0.0.1:8000/get-predictions")
+    data = res.json()
+    df = pd.DataFrame(data)
+    # Rename columns
+    column_mapping = {
+        "own_car": "FLAG_OWN_CAR",
+        "own_realty": "FLAG_OWN_REALTY",
+        "income": "AMT_INCOME_TOTAL",
+        "family_status": "NAME_FAMILY_STATUS",
+        "result": "NAME_INCOME_TYPE",
+        "education": "NAME_EDUCATION_TYPE",
+        "housing_type": "NAME_HOUSING_TYPE",
+        "birthday": "DAYS_BIRTH",
+        "employed_day": "DAYS_EMPLOYED",
+        "occupation": "OCCUPATION_TYPE",
+        "fam_members": "CNT_FAM_MEMBERS",
+        "result": "RESULT",
+    }
+    df.rename(columns=column_mapping, inplace=True)
+    st.table(df if "df" in locals() else pd.DataFrame())
+
+
+if __name__ == "__main__":
+    app()
