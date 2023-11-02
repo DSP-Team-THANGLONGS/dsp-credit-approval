@@ -1,10 +1,11 @@
-# BEGIN: 3j4k5l6m7n8o
 import streamlit as st
 import json
 import datetime
 import requests
 import pandas as pd
 
+PAGE_PREDICT = "Predict Credit Card Approval"
+PAGE_PAST_PREDICTIONS = "Past Predictions"
 
 def predict():
     st.title("Credit Card Approval Form")
@@ -12,6 +13,7 @@ def predict():
         "Please fill out the following form to check your eligibility for a credit card."
     )
 
+    # Your existing code for the prediction form goes here
     # Question 1
     st.write("Do you own a car?")
     car_options = ["Yes", "No"]
@@ -177,14 +179,12 @@ def predict():
         result = f"This profile is a {is_good_applicant} applicants"
         st.write(result)
 
-
 def past_predictions():
     st.title("Past predictions:")
 
     res = requests.get("http://127.0.0.1:8000/get-predictions")
     data = res.json()
     df = pd.DataFrame(data)
-    # Rename columns
     column_mapping = {
         "date_prediction": "date prediction",
         "own_car": "Car Owner",
@@ -209,7 +209,12 @@ def past_predictions():
     else:
         st.write("No data available.")
 
+pages = {
+    PAGE_PREDICT: predict,
+    PAGE_PAST_PREDICTIONS: past_predictions,
+}
 
-if __name__ == "__main__":
-    predict()
-    past_predictions()
+st.sidebar.title("Navigation")
+selected_page = st.sidebar.radio("Go to", list(pages.keys()))
+
+pages[selected_page]()
