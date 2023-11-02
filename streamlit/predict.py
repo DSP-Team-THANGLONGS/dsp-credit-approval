@@ -2,10 +2,11 @@ import streamlit as st
 import json
 import datetime
 import requests
+import pandas as pd
+import config
 
 
-def predict():
-    st.title("Credit Card Approval Form")
+def handle_form_input():
     st.write(
         "Please fill out the following form to check your eligibility for a credit card."
     )
@@ -29,18 +30,6 @@ def predict():
         min_value=datetime.date(1950, 1, 1),
         max_value=datetime.date.today(),
     )
-
-    # # Question 3
-    # st.write(" Do you have children?")
-    # children_options = ["Yes", "No"]
-    # children = st.radio("Select an option", children_options, key="radio3")
-    # children_count = 0
-    # if children == "Yes":
-    #     st.write("How many children do you have?")
-    #     children_count_options = list(range(11))
-    #     children_count = st.selectbox(
-    #         "Select an option", children_count_options, key="select1"
-    #     )
 
     # Question 5
     st.write("What is your yearly income?")
@@ -199,10 +188,7 @@ def predict():
             "OCCUPATION_TYPE": occupation,
             "CNT_FAM_MEMBERS": family_members,
         }
-
-        res = requests.post(
-            "http://127.0.0.1:8000/predict", data=json.dumps(data)
-        )
+        res = requests.post(config.URL_PREDICT, data=json.dumps(data))
         input_list = (res.text).strip("[]").split(",")
         result_list = [
             int(item.strip('"'))
@@ -215,6 +201,67 @@ def predict():
         is_good_applicant = "good" if result_list[0] == 1 else "bad"
         result = f"This profile is a {is_good_applicant} applicants"
         st.write(result)
+
+
+def handle_csv_input():
+    uploaded_file = st.file_uploader(
+        "Upload your CSV file here, recommended to use the sample file above.",
+        type=["csv"],
+    )
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        df["prediction"] = ""
+
+        for index, row in df.iterrows():
+            data = {
+                "FLAG_OWN_CAR": row["FLAG_OWN_CAR"],
+                "FLAG_OWN_REALTY": row["FLAG_OWN_REALTY"],
+                "AMT_INCOME_TOTAL": row["AMT_INCOME_TOTAL"],
+                "NAME_INCOME_TYPE": row["NAME_INCOME_TYPE"],
+                "NAME_EDUCATION_TYPE": row["NAME_EDUCATION_TYPE"],
+                "NAME_FAMILY_STATUS": row["NAME_FAMILY_STATUS"],
+                "NAME_HOUSING_TYPE": row["NAME_HOUSING_TYPE"],
+                "DAYS_BIRTH": row["DAYS_BIRTH"],
+                "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
+                "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
+                "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
+            }
+            response = requests.post(config.URL_PREDICT, data=json.dumps(data))
+            prediction = response.json()
+            prediction_value = prediction
+
+            df.at[index, "result"] = prediction_value
+
+        st.info("Prediction Result")
+        st.dataframe(
+            df[
+                [
+                    "FLAG_OWN_CAR",
+                    "FLAG_OWN_REALTY",
+                    "AMT_INCOME_TOTAL",
+                    "NAME_INCOME_TYPE",
+                    "NAME_EDUCATION_TYPE",
+                    "NAME_FAMILY_STATUS",
+                    "NAME_HOUSING_TYPE",
+                    "DAYS_BIRTH",
+                    "DAYS_EMPLOYED",
+                    "OCCUPATION_TYPE",
+                    "CNT_FAM_MEMBERS",
+                    "result",
+                ]
+            ]
+        )
+
+
+def predict():
+    st.title("Credit Card Approval")
+    st.write("Do you want to upload file or fill the form?")
+    selection_options = ["Fill the form", "Upload CSV"]
+    selection = st.radio("Select an option", selection_options, key="radio3")
+    if selection == "Fill the form":
+        handle_form_input()
+    else:
+        handle_csv_input()
 
 
 if __name__ == "__main__":
