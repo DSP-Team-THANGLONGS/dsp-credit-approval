@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from scripts.preprocessing import features_preprocessing
 from database.database import SessionLocal, engine
-from database import crud, models, schemas
+from database import crud, models
 from sqlalchemy.orm import Session
 import datetime
 
