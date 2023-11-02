@@ -3,9 +3,10 @@ import streamlit as st
 import json
 import datetime
 import requests
+import pandas as pd
 
 
-def main():
+def predict():
     st.title("Credit Card Approval Form")
     st.write(
         "Please fill out the following form to check your eligibility for a credit card."
@@ -143,7 +144,7 @@ def main():
         birthday_calc = birthday - datetime.date.today()
         employed_calc = (
             workday - datetime.date.today()
-            if isWorking == "YES"
+            if isWorking == "Yes"
             else datetime.date.today() - workday
         )
         data = {
@@ -174,8 +175,34 @@ def main():
         ]
         is_good_applicant = "good" if result_list[0] == 1 else "bad"
         result = f"This profile is a {is_good_applicant} applicants"
-        st.subheader(result)
+        st.write(result)
+
+
+def past_predictions():
+    st.title("Past predictions:")
+
+    res = requests.get("http://127.0.0.1:8000/get-predictions")
+    data = res.json()
+    df = pd.DataFrame(data)
+    # Rename columns
+    column_mapping = {
+        "own_car": "FLAG_OWN_CAR",
+        "own_realty": "FLAG_OWN_REALTY",
+        "income": "AMT_INCOME_TOTAL",
+        "family_status": "NAME_FAMILY_STATUS",
+        "result": "NAME_INCOME_TYPE",
+        "education": "NAME_EDUCATION_TYPE",
+        "housing_type": "NAME_HOUSING_TYPE",
+        "birthday": "DAYS_BIRTH",
+        "employed_day": "DAYS_EMPLOYED",
+        "occupation": "OCCUPATION_TYPE",
+        "fam_members": "CNT_FAM_MEMBERS",
+        "result": "RESULT",
+    }
+    df.rename(columns=column_mapping, inplace=True)
+    st.table(df if "df" in locals() else pd.DataFrame())
 
 
 if __name__ == "__main__":
-    main()
+    predict()
+    past_predictions()
