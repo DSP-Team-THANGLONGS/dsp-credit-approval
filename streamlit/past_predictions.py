@@ -1,12 +1,13 @@
 import streamlit as st
 import requests
 import pandas as pd
+import config
 
 
 def past_predictions():
     st.title("Past predictions:")
 
-    res = requests.get("http://127.0.0.1:8000/get-predictions")
+    res = requests.get(config.URL_GET_PREDICTIONS)
     data = res.json()
     df = pd.DataFrame(data)
     # Rename columns
@@ -30,7 +31,7 @@ def past_predictions():
     df["Result"] = df["Result"].replace({1: "Good", 0: "Bad"})
     df["Income Total"] = df["Income Total"].round(2)
     if not df.empty:
-        st.table(df)
+        st.dataframe(df)
     else:
         st.write("No data available.")
 
