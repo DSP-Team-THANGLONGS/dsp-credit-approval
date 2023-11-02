@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Date, Integer, String, Float
+from sqlalchemy import Column, Date, Integer, String, Float, Boolean
 
 
 class Records(Base):
@@ -12,8 +12,9 @@ class Records(Base):
     education = Column(String, index=True)
     family_status = Column(String, index=True)
     housing_type = Column(String, index=True)
-    birthday = Column(Integer)
-    employed_day = Column(Integer)
+    birthday = Column(Date)
+    employed_day = Column(Date)
+    still_working = Column(Boolean)
     occupation = Column(String, index=True)
     fam_members = Column(Integer)
     result = Column(Integer)
