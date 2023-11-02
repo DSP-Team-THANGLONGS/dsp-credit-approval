@@ -3,9 +3,10 @@ import streamlit as st
 import json
 import datetime
 import requests
+import pandas as pd
 
 
-def main():
+def predict():
     st.title("Credit Card Approval Form")
     st.write(
         "Please fill out the following form to check your eligibility for a credit card."
@@ -27,17 +28,17 @@ def main():
     st.write("What is your birthday?")
     birthday = st.date_input("Calendar", datetime.date(1999, 11, 12))
 
-    # Question 3
-    st.write(" Do you have children?")
-    children_options = ["Yes", "No"]
-    children = st.radio("Select an option", children_options, key="radio3")
-    children_count = 0
-    if children == "Yes":
-        st.write("How many children do you have?")
-        children_count_options = list(range(11))
-        children_count = st.selectbox(
-            "Select an option", children_count_options, key="select1"
-        )
+    # # Question 3
+    # st.write(" Do you have children?")
+    # children_options = ["Yes", "No"]
+    # children = st.radio("Select an option", children_options, key="radio3")
+    # children_count = 0
+    # if children == "Yes":
+    #     st.write("How many children do you have?")
+    #     children_count_options = list(range(11))
+    #     children_count = st.selectbox(
+    #         "Select an option", children_count_options, key="select1"
+    #     )
 
     # Question 5
     st.write("What is your yearly income?")
@@ -143,7 +144,7 @@ def main():
         birthday_calc = birthday - datetime.date.today()
         employed_calc = (
             workday - datetime.date.today()
-            if isWorking == "YES"
+            if isWorking == "Yes"
             else datetime.date.today() - workday
         )
         data = {
@@ -174,8 +175,41 @@ def main():
         ]
         is_good_applicant = "good" if result_list[0] == 1 else "bad"
         result = f"This profile is a {is_good_applicant} applicants"
-        st.subheader(result)
+        st.write(result)
+
+
+def past_predictions():
+    st.title("Past predictions:")
+
+    res = requests.get("http://127.0.0.1:8000/get-predictions")
+    data = res.json()
+    df = pd.DataFrame(data)
+    # Rename columns
+    column_mapping = {
+        "date_prediction": "date prediction",
+        "own_car": "Car Owner",
+        "own_realty": "Realty Owner",
+        "income": "Income Total",
+        "family_status": "Family Status",
+        "education": "Eductation",
+        "housing_type": "Housing Type",
+        "birthday": "Birthday",
+        "employed_day": "(Un)Employed day",
+        "still_working": "Is still working",
+        "occupation": "Occupation",
+        "fam_members": "Family member",
+        "result": "Result",
+    }
+    df.rename(columns=column_mapping, inplace=True)
+    df = df[column_mapping.values()]
+    df["Result"] = df["Result"].replace({1: "Good", 0: "Bad"})
+
+    if not df.empty:
+        st.table(df)
+    else:
+        st.write("No data available.")
 
 
 if __name__ == "__main__":
-    main()
+    predict()
+    past_predictions()

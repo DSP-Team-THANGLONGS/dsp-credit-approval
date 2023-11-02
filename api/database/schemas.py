@@ -11,8 +11,9 @@ class RecordsBase(BaseModel):
     education: str
     family_status: str
     housing_type: str
-    birthday: int
-    employed_day: int
+    birthday: datetime.date
+    employed_day: datetime.date
+    still_working: bool
     occupation: str
     fam_members: int
     result: int
@@ -26,8 +27,9 @@ class RecordCreate(RecordsBase):
     education: str
     family_status: str
     housing_type: str
-    birthday: int
-    employed_day: int
+    birthday: datetime.date
+    employed_day: datetime.date
+    still_working: bool
     occupation: str
     fam_members: int
     result: int
@@ -41,8 +43,9 @@ class Record(RecordsBase):
     education: str
     family_status: str
     housing_type: str
-    birthday: int
-    employed_day: int
+    birthday: datetime.date
+    employed_day: datetime.date
+    still_working: bool    
     occupation: str
     fam_members: int
     result: int
