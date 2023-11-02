@@ -28,17 +28,17 @@ def predict():
     st.write("What is your birthday?")
     birthday = st.date_input("Calendar", datetime.date(1999, 11, 12))
 
-    # Question 3
-    st.write(" Do you have children?")
-    children_options = ["Yes", "No"]
-    children = st.radio("Select an option", children_options, key="radio3")
-    children_count = 0
-    if children == "Yes":
-        st.write("How many children do you have?")
-        children_count_options = list(range(11))
-        children_count = st.selectbox(
-            "Select an option", children_count_options, key="select1"
-        )
+    # # Question 3
+    # st.write(" Do you have children?")
+    # children_options = ["Yes", "No"]
+    # children = st.radio("Select an option", children_options, key="radio3")
+    # children_count = 0
+    # if children == "Yes":
+    #     st.write("How many children do you have?")
+    #     children_count_options = list(range(11))
+    #     children_count = st.selectbox(
+    #         "Select an option", children_count_options, key="select1"
+    #     )
 
     # Question 5
     st.write("What is your yearly income?")
