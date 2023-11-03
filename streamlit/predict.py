@@ -187,6 +187,7 @@ def handle_form_input():
             "DAYS_EMPLOYED": employed_calc.days,
             "OCCUPATION_TYPE": occupation,
             "CNT_FAM_MEMBERS": family_members,
+            "PLATFORM": "App",
         }
         res = requests.post(config.URL_PREDICT, data=json.dumps(data))
         input_list = (res.text).strip("[]").split(",")
@@ -225,6 +226,7 @@ def handle_csv_input():
                 "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
                 "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
                 "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
+                "PLATFORM": "App",
             }
             response = requests.post(config.URL_PREDICT, data=json.dumps(data))
             prediction = response.json()
@@ -249,7 +251,8 @@ def handle_csv_input():
                     "CNT_FAM_MEMBERS",
                     "result",
                 ]
-            ]
+            ],
+            hide_index=True,
         )
 
 

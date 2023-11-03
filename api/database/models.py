@@ -19,3 +19,4 @@ class Records(Base):
     fam_members = Column(Integer)
     result = Column(Integer)
     date_prediction = Column(Date)
+    platform = Column(String, index=True)

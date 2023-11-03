@@ -27,6 +27,7 @@ def save_record(db: Session, record: dict):
         still_working=record["still_working"],
         fam_members=record["fam_members"],
         result=record["result"],
+        platform=record["platform"],
         date_prediction=record["date_prediction"],
     )
     db.add(db_record)
