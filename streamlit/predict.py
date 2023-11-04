@@ -206,7 +206,7 @@ def handle_form_input():
 
 def handle_csv_input():
     uploaded_file = st.file_uploader(
-        "Upload your CSV file here, recommended to use the sample file above.",
+        "Upload your CSV file here.",
         type=["csv"],
     )
     if uploaded_file is not None:
