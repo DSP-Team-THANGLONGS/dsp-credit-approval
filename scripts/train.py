@@ -18,11 +18,9 @@ def build_model(data: pd.DataFrame) -> dict[str, str]:
     val_set_features, val_set_target = features_preprocessing(val_set)
 
     classifiers = {
-        "Decision Tree": DecisionTreeClassifier(max_depth=10),
-        "Random Forest": RandomForestClassifier(
-            n_estimators=150, max_depth=10
-        ),
-        "Logistic Regression": LogisticRegression(C=0.1),
+        "Decision Tree": DecisionTreeClassifier(max_depth=8),
+        "Random Forest": RandomForestClassifier(n_estimators=100, max_depth=7),
+        "Logistic Regression": LogisticRegression(C=0.1, random_state=42),
         "SVM": SVC(kernel="poly", C=0.5),
         "Naive Bayes": GaussianNB(),
     }

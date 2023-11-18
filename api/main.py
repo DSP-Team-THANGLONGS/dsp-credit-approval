@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from scripts.preprocessing import features_preprocessing
 from database.database import SessionLocal, engine
-from database import crud, models, schemas
+from database import crud, models
 from sqlalchemy.orm import Session
 import datetime
 
@@ -55,6 +55,7 @@ async def save_predict(
         "occupation": data["OCCUPATION_TYPE"].values[0],
         "fam_members": data["CNT_FAM_MEMBERS"].values[0],
         "result": data["RESULT"].values[0],
+        "platform": data["PLATFORM"].values[0],
         "date_prediction": date_prediction,
     }
     db_record = crud.save_record(db=db, record=record)

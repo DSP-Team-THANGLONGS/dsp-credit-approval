@@ -3,6 +3,22 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
 import pickle
 
+onehot_cols = [
+    "NAME_FAMILY_STATUS",
+    "NAME_INCOME_TYPE",
+    "NAME_EDUCATION_TYPE",
+    "NAME_HOUSING_TYPE",
+    "OCCUPATION_TYPE",
+    "FLAG_OWN_CAR",
+    "FLAG_OWN_REALTY",
+]
+scale_cols = [
+    "AMT_INCOME_TOTAL",
+    "DAYS_EMPLOYED",
+    "DAYS_BIRTH",
+    "CNT_FAM_MEMBERS",
+]
+
 
 def select_core_columns(data: pd.DataFrame) -> pd.DataFrame:
     core_columns = [
@@ -43,29 +59,14 @@ def load_or_fit_encoder(
 
 
 def load_or_fit_onehot_encoder(data: pd.DataFrame) -> OneHotEncoder:
-    columns = [
-        "NAME_FAMILY_STATUS",
-        "NAME_INCOME_TYPE",
-        "NAME_EDUCATION_TYPE",
-        "NAME_HOUSING_TYPE",
-        "OCCUPATION_TYPE",
-        "FLAG_OWN_CAR",
-        "FLAG_OWN_REALTY",
-    ]
     params = {"handle_unknown": "ignore"}
     return load_or_fit_encoder(
-        "onehot_encoder", data, columns, OneHotEncoder, params
+        "onehot_encoder", data, onehot_cols, OneHotEncoder, params
     )
 
 
 def load_or_fit_scaler(data: pd.DataFrame) -> StandardScaler:
-    columns = [
-        "AMT_INCOME_TOTAL",
-        "DAYS_EMPLOYED",
-        "DAYS_BIRTH",
-        "CNT_FAM_MEMBERS",
-    ]
-    return load_or_fit_encoder("scaler", data, columns, StandardScaler)
+    return load_or_fit_encoder("scaler", data, scale_cols, StandardScaler)
 
 
 def load_encoder_scaler(data: pd.DataFrame) -> tuple:
@@ -111,22 +112,8 @@ def map_values(
 
 
 def transform_data(data: pd.DataFrame, onehot_encoder, scaler) -> pd.DataFrame:
-    onehot_cols = [
-        "NAME_FAMILY_STATUS",
-        "NAME_INCOME_TYPE",
-        "NAME_EDUCATION_TYPE",
-        "NAME_HOUSING_TYPE",
-        "OCCUPATION_TYPE",
-        "FLAG_OWN_CAR",
-        "FLAG_OWN_REALTY",
-    ]
     data = encode_onehot(data, onehot_cols, onehot_encoder)
-    scale_cols = [
-        "AMT_INCOME_TOTAL",
-        "DAYS_EMPLOYED",
-        "DAYS_BIRTH",
-        "CNT_FAM_MEMBERS",
-    ]
+
     data = scale_features(data, scale_cols, scaler)
     return data
 

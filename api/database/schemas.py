@@ -17,6 +17,7 @@ class RecordsBase(BaseModel):
     occupation: str
     fam_members: int
     result: int
+    platform: str
     date_prediction: datetime.date
 
 
@@ -33,6 +34,7 @@ class RecordCreate(RecordsBase):
     occupation: str
     fam_members: int
     result: int
+    platform: str
     date_prediction: datetime.date
 
 
@@ -45,10 +47,11 @@ class Record(RecordsBase):
     housing_type: str
     birthday: datetime.date
     employed_day: datetime.date
-    still_working: bool    
+    still_working: bool
     occupation: str
     fam_members: int
     result: int
+    platform: str
     date_prediction: datetime.date
 
     class Config:
