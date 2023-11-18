@@ -1,7 +1,6 @@
 import sys
 
 sys.path.append("../")
-from typing import Union
 from fastapi import FastAPI, Depends
 import pickle
 import pandas as pd
