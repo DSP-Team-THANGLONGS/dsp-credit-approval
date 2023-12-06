@@ -72,15 +72,23 @@ def get_features(columns: str):
 
 
 @app.post("/predict")
-async def make_predictions(features: dict, db: Session = Depends(get_db)):
+async def make_predictions(
+    features: list[dict], db: Session = Depends(get_db)
+):
     # load model
     model_path = "../output_model/model.pkl"
     loaded_model = pickle.load(open(model_path, "rb"))
-    converted_ft = pd.DataFrame([features])
+    converted_ft = pd.DataFrame(features)
     processed_ft, _ = features_preprocessing(converted_ft.copy())
-    result = 1 if loaded_model.predict_proba(processed_ft)[:, 1] >= 0.65 else 0
+    result = [
+        rs
+        for rs in (
+            1 if proba >= 0.65 else 0
+            for proba in loaded_model.predict_proba(processed_ft)[:, 1]
+        )
+    ]
     converted_ft["RESULT"] = result
-    await save_predict(converted_ft, db=db)
+    # await save_predict(converted_ft, db=db)
     return str(result)
 
 
