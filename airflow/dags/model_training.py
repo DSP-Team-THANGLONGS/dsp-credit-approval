@@ -6,6 +6,10 @@ import pandas as pd
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 
+import sys
+
+sys.path.append("../../")
+
 
 @dag(
     dag_id="ingest_data",
@@ -38,7 +42,6 @@ def ingest_data():
         logging.info(f"Ingesting data to the file: {filepath}")
         data_to_ingest_df.to_csv(filepath, index=False)
 
-    # Task relationships
     data_to_ingest = get_data_to_ingest_from_local_file()
     save_data(data_to_ingest)
 
