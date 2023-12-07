@@ -5,6 +5,9 @@ from . import models
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import cast, Float
+
 register_adapter(np.int64, AsIs)
 
 
@@ -13,24 +16,32 @@ def get_records(db: Session, limit: int = 100):
     return records
 
 
-def save_record(db: Session, record: dict):
-    db_record = models.Records(
-        own_car=record["own_car"],
-        own_realty=record["own_realty"],
-        income=record["income"],
-        education=record["education"],
-        family_status=record["family_status"],
-        housing_type=record["housing_type"],
-        birthday=record["birthday"],
-        employed_day=record["employed_day"],
-        occupation=record["occupation"],
-        still_working=record["still_working"],
-        fam_members=record["fam_members"],
-        result=record["result"],
-        platform=record["platform"],
-        date_prediction=record["date_prediction"],
-    )
-    db.add(db_record)
+def save_record(db: Session, records: dict):
+    # Assuming all lists have the same length
+    num_records = len(records["own_car"])
+
+    # Create a list to hold the Records objects
+    db_records = []
+    for i in range(num_records):
+        db_record = models.Records(
+            own_car=records["own_car"][i],
+            own_realty=records["own_realty"][i],
+            income=records["income"][i],
+            education=records["education"][i],
+            family_status=records["family_status"][i],
+            housing_type=records["housing_type"][i],
+            birthday=records["birthday"][i],
+            employed_day=records["employed_day"][i],
+            still_working=records["still_working"][i],
+            occupation=records["occupation"][i],
+            fam_members=records["fam_members"][i],
+            result=records["result"][i],
+            platform=records["platform"][i],
+            date_prediction=records["date_prediction"][i],
+        )
+        db_records.append(db_record)
+    db.add_all(db_records)
     db.commit()
-    db.refresh(db_record)
-    return db_record
+    for db_record in db_records:
+        db.refresh(db_record)
+    return db_records
