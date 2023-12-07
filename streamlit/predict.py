@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import datetime
+import ast
 import requests
 import pandas as pd
 import config
@@ -175,20 +176,22 @@ def handle_form_input():
             if isWorking == "Yes"
             else datetime.date.today() - workday
         )
-        data = {
-            "FLAG_OWN_CAR": car[0],
-            "FLAG_OWN_REALTY": real_estate[0],
-            "AMT_INCOME_TOTAL": income,
-            "NAME_INCOME_TYPE": income_type,
-            "NAME_EDUCATION_TYPE": education,
-            "NAME_FAMILY_STATUS": marital_status,
-            "NAME_HOUSING_TYPE": housing,
-            "DAYS_BIRTH": birthday_calc.days,
-            "DAYS_EMPLOYED": employed_calc.days,
-            "OCCUPATION_TYPE": occupation,
-            "CNT_FAM_MEMBERS": family_members,
-            "PLATFORM": "App",
-        }
+        data = [
+            {
+                "FLAG_OWN_CAR": car[0],
+                "FLAG_OWN_REALTY": real_estate[0],
+                "AMT_INCOME_TOTAL": income,
+                "NAME_INCOME_TYPE": income_type,
+                "NAME_EDUCATION_TYPE": education,
+                "NAME_FAMILY_STATUS": marital_status,
+                "NAME_HOUSING_TYPE": housing,
+                "DAYS_BIRTH": birthday_calc.days,
+                "DAYS_EMPLOYED": employed_calc.days,
+                "OCCUPATION_TYPE": occupation,
+                "CNT_FAM_MEMBERS": family_members,
+                "PLATFORM": "App",
+            }
+        ]
         res = requests.post(config.URL_PREDICT, data=json.dumps(data))
         input_list = (res.text).strip("[]").split(",")
         result_list = [
@@ -211,28 +214,29 @@ def handle_csv_input():
     )
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        df["prediction"] = ""
-
+        data = []
         for index, row in df.iterrows():
-            data = {
-                "FLAG_OWN_CAR": row["FLAG_OWN_CAR"],
-                "FLAG_OWN_REALTY": row["FLAG_OWN_REALTY"],
-                "AMT_INCOME_TOTAL": row["AMT_INCOME_TOTAL"],
-                "NAME_INCOME_TYPE": row["NAME_INCOME_TYPE"],
-                "NAME_EDUCATION_TYPE": row["NAME_EDUCATION_TYPE"],
-                "NAME_FAMILY_STATUS": row["NAME_FAMILY_STATUS"],
-                "NAME_HOUSING_TYPE": row["NAME_HOUSING_TYPE"],
-                "DAYS_BIRTH": row["DAYS_BIRTH"],
-                "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
-                "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
-                "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
-                "PLATFORM": "App",
-            }
-            response = requests.post(config.URL_PREDICT, data=json.dumps(data))
-            prediction = response.json()
-            prediction_value = prediction
-
-            df.at[index, "result"] = prediction_value
+            data.append(
+                {
+                    "FLAG_OWN_CAR": row["FLAG_OWN_CAR"],
+                    "FLAG_OWN_REALTY": row["FLAG_OWN_REALTY"],
+                    "AMT_INCOME_TOTAL": row["AMT_INCOME_TOTAL"],
+                    "NAME_INCOME_TYPE": row["NAME_INCOME_TYPE"],
+                    "NAME_EDUCATION_TYPE": row["NAME_EDUCATION_TYPE"],
+                    "NAME_FAMILY_STATUS": row["NAME_FAMILY_STATUS"],
+                    "NAME_HOUSING_TYPE": row["NAME_HOUSING_TYPE"],
+                    "DAYS_BIRTH": row["DAYS_BIRTH"],
+                    "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
+                    "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
+                    "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
+                    "PLATFORM": "App",
+                }
+            )
+        print(data)
+        response = requests.post(config.URL_PREDICT, data=json.dumps(data))
+        prediction_str = response.json()
+        prediction = ast.literal_eval(prediction_str)
+        df["result"] = prediction
 
         st.info("Prediction Result")
         st.dataframe(
