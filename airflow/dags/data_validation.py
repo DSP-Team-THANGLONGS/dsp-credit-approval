@@ -146,7 +146,7 @@ def process_file(file_path, folder_b, folder_c):
 
 
 def store_file_in_folder(file_path, destination_folder):
-    shutil.copy(
+    shutil.move(
         file_path,
         os.path.join(destination_folder, os.path.basename(file_path)),
     )

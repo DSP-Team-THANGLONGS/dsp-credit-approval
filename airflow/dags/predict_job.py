@@ -1,49 +1,60 @@
-import logging
-from datetime import datetime
+import glob
+import json
 from datetime import timedelta
+import os
 
 import pandas as pd
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 
-import sys
+import config
 
-sys.path.append("../../")
+import requests
+import data_validation as dv
 
 
 @dag(
-    dag_id="ingest_data",
+    dag_id="predict_data",
     description="Ingest data from a file to another DAG",
-    tags=["dsp", "data_ingestion"],
+    tags=["dsp", "data_prediction"],
     schedule=timedelta(minutes=2),
     start_date=days_ago(n=0, hour=1),
 )
-def ingest_data():
+def predict_data():
     @task
-    def get_data_to_ingest_from_local_file() -> str:
-        nb_rows = 10
-        filepath = (
-            "/home/mdv/dsp-credit-approval/airflow/data/external_data.csv"
+    def data_prediction() -> str:
+        directory_path = (
+            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/success"
         )
-        input_data_df = pd.read_csv(filepath)
-        logging.info(f"Extract {nb_rows} rows from the file {filepath}")
-        data_to_ingest_df = input_data_df.sample(n=nb_rows)
+        predicted_path = (
+            "/home/mdv/dsp-credit-approval/airflow/data/predicted_data/"
+        )
+        file_pattern = os.path.join(directory_path, "*.csv")
+        file_path = glob.glob(file_pattern)[0]
+        df = pd.read_csv(file_path)
+        data = []
+        for _, row in df.iterrows():
+            data.append(
+                {
+                    "FLAG_OWN_CAR": row["FLAG_OWN_CAR"],
+                    "FLAG_OWN_REALTY": row["FLAG_OWN_REALTY"],
+                    "AMT_INCOME_TOTAL": row["AMT_INCOME_TOTAL"],
+                    "NAME_INCOME_TYPE": row["NAME_INCOME_TYPE"],
+                    "NAME_EDUCATION_TYPE": row["NAME_EDUCATION_TYPE"],
+                    "NAME_FAMILY_STATUS": row["NAME_FAMILY_STATUS"],
+                    "NAME_HOUSING_TYPE": row["NAME_HOUSING_TYPE"],
+                    "DAYS_BIRTH": row["DAYS_BIRTH"],
+                    "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
+                    "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
+                    "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
+                    "PLATFORM": "Job",
+                }
+            )
+        response = requests.post(config.URL_PREDICT, data=json.dumps(data))
+        print(response)
+        dv.store_file_in_folder(file_path, predicted_path)
 
-        # Convert DataFrame to JSON string
-        data_to_ingest_json = data_to_ingest_df.to_json(orient="records")
-
-        return data_to_ingest_json
-
-    @task
-    def save_data(data_to_ingest_json: pd.DataFrame) -> None:
-        data_to_ingest_df = pd.read_json(data_to_ingest_json, orient="records")
-
-        filepath = f'/home/mdv/dsp-credit-approval/airflow/data/output_data/{datetime.now().strftime("%Y-%M-%d_%H-%M-%S")}.csv'
-        logging.info(f"Ingesting data to the file: {filepath}")
-        data_to_ingest_df.to_csv(filepath, index=False)
-
-    data_to_ingest = get_data_to_ingest_from_local_file()
-    save_data(data_to_ingest)
+    data_prediction()
 
 
-ingest_data_dag = ingest_data()
+ingest_data_dag = predict_data()

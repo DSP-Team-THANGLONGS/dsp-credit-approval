@@ -232,7 +232,6 @@ def handle_csv_input():
                     "PLATFORM": "App",
                 }
             )
-        print(data)
         response = requests.post(config.URL_PREDICT, data=json.dumps(data))
         prediction_str = response.json()
         prediction = ast.literal_eval(prediction_str)

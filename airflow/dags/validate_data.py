@@ -25,10 +25,10 @@ def validate_data():
             "/home/mdv/dsp-credit-approval/airflow/data/split_data"
         )
         success_path = (
-            "/home/mdv/dsp-credit-approval/airflow/data/processed_data/success"
+            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/success"
         )
         fail_path = (
-            "/home/mdv/dsp-credit-approval/airflow/data/processed_data/fail"
+            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/fail"
         )
         file_pattern = os.path.join(directory_path, "*.csv")
         file_paths = glob.glob(file_pattern)
