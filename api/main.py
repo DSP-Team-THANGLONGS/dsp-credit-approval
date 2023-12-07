@@ -30,34 +30,42 @@ def get_db():
 async def save_predict(
     data: pd.DataFrame, db: Session = Depends(get_db)
 ) -> bool:
-    date_prediction = datetime.date.today()
-    date_prediction = date_prediction.strftime("%Y-%m-%d")
+    # Calculate today's date
     today = datetime.datetime.now().date()
-    birthday = today - datetime.timedelta(
-        days=int(np.abs(data["DAYS_BIRTH"].values[0]))
+
+    # Convert "DAYS_BIRTH" and "DAYS_EMPLOYED" columns to absolute values
+    data["DAYS_BIRTH"] = np.abs(data["DAYS_BIRTH"])
+    data["DAYS_EMPLOYED"] = np.abs(data["DAYS_EMPLOYED"])
+
+    # Calculate birthday and employed day
+    data["DAYS_BIRTH"] = data["DAYS_BIRTH"].apply(
+        lambda x: today - pd.to_timedelta(x, unit="D")
     )
-    employed_day = today - datetime.timedelta(
-        days=int(np.abs(data["DAYS_EMPLOYED"].values[0]))
+    data["EMPLOYED_DAY"] = data["DAYS_EMPLOYED"].apply(
+        lambda x: today - pd.to_timedelta(x, unit="D")
     )
 
-    still_working = True if data["DAYS_EMPLOYED"].values[0] < 0 else False
-    record = {
-        "own_car": data["FLAG_OWN_CAR"].values[0],
-        "own_realty": data["FLAG_OWN_REALTY"].values[0],
-        "income": data["AMT_INCOME_TOTAL"].values[0],
-        "education": data["NAME_EDUCATION_TYPE"].values[0],
-        "family_status": data["NAME_FAMILY_STATUS"].values[0],
-        "housing_type": data["NAME_HOUSING_TYPE"].values[0],
-        "birthday": birthday,
-        "employed_day": employed_day,
-        "still_working": still_working,
-        "occupation": data["OCCUPATION_TYPE"].values[0],
-        "fam_members": data["CNT_FAM_MEMBERS"].values[0],
-        "result": data["RESULT"].values[0],
-        "platform": data["PLATFORM"].values[0],
-        "date_prediction": date_prediction,
+    # Determine if still working
+    data["STILL_WORKING"] = data["DAYS_EMPLOYED"] < 0
+
+    # Create the record DataFrame
+    records = {
+        "own_car": data["FLAG_OWN_CAR"].tolist(),
+        "own_realty": data["FLAG_OWN_REALTY"].tolist(),
+        "income": data["AMT_INCOME_TOTAL"].tolist(),
+        "education": data["NAME_EDUCATION_TYPE"].tolist(),
+        "family_status": data["NAME_FAMILY_STATUS"].tolist(),
+        "housing_type": data["NAME_HOUSING_TYPE"].tolist(),
+        "birthday": data["DAYS_BIRTH"].tolist(),
+        "employed_day": data["EMPLOYED_DAY"].tolist(),
+        "still_working": data["STILL_WORKING"].tolist(),
+        "occupation": data["OCCUPATION_TYPE"].tolist(),
+        "fam_members": data["CNT_FAM_MEMBERS"].tolist(),
+        "result": data["RESULT"].tolist(),
+        "platform": data["PLATFORM"].tolist(),
+        "date_prediction": [today.strftime("%Y-%m-%d")] * len(data),
     }
-    db_record = crud.save_record(db=db, record=record)
+    db_record = crud.save_record(db=db, records=records)
     return db_record
 
 
