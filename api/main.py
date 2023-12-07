@@ -88,7 +88,7 @@ async def make_predictions(
         )
     ]
     converted_ft["RESULT"] = result
-    # await save_predict(converted_ft, db=db)
+    await save_predict(converted_ft, db=db)
     return str(result)
 
 
