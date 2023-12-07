@@ -120,7 +120,8 @@ def read_and_validate_file(df):
     return validation_result
 
 
-def process_file(file_path, folder_b, folder_c, db_url):
+def process_file(file_path, folder_b, folder_c):
+    db_url = "postgresql://postgres:121199@localhost/dsp"
     df = pd.read_csv(file_path)
     validation_result = read_and_validate_file(df)
 
@@ -137,7 +138,7 @@ def process_file(file_path, folder_b, folder_c, db_url):
 
         else:
             split_file_and_save_problems(
-                file_path, folder_b, folder_c, validation_result
+                file_path, folder_b, folder_c, validation_result, db_url
             )
 
     if not validation_result["success"]:
@@ -145,7 +146,7 @@ def process_file(file_path, folder_b, folder_c, db_url):
 
 
 def store_file_in_folder(file_path, destination_folder):
-    shutil.move(
+    shutil.copy(
         file_path,
         os.path.join(destination_folder, os.path.basename(file_path)),
     )
@@ -177,7 +178,7 @@ def save_data_problems_statistics(validation_result, db_url):
 
 
 def split_file_and_save_problems(
-    file_path, folder_b, folder_c, validation_result
+    file_path, folder_b, folder_c, validation_result, db_url
 ):
     df = pd.read_csv(file_path)
 
@@ -212,10 +213,3 @@ def alert_user_with_teams_notification():
     teamcity.post_message(
         "Data quality issues detected. Check the logs for details."
     )
-
-
-file_to_process = "./data/external_data/external_data.csv"
-folder_B = "./data/output_data"
-folder_C = "./data/processed_data"
-db_url = "postgresql://postgres:121199@localhost/dsp"
-process_file(file_to_process, folder_B, folder_C, db_url)
