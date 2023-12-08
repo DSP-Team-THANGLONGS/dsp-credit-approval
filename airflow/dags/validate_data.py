@@ -15,8 +15,8 @@ import data_validation as dv
     dag_id="validate_data",
     description="Validate data from a file to another DAG",
     tags=["dsp", "data_validation"],
-    schedule=timedelta(minutes=2),
-    start_date=days_ago(n=0, hour=1),
+    schedule=timedelta(minutes=3),
+    start_date=days_ago(n=0, hour=0),
 )
 def validate_data():
     @task
