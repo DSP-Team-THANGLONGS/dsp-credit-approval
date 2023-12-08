@@ -9,3 +9,6 @@ uvicorn[standard]
 imblearn
 SQLAlchemy==2.0.13
 psycopg2==2.9.6
+apache-airflow==2.5.1
+flask==2.2.0
+connexion==2.10.0

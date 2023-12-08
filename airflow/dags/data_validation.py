@@ -1,12 +1,12 @@
+import logging
 import great_expectations as ge
 import shutil
 import os
 import pandas as pd
-from pyteamcity import TeamCity
-from sqlalchemy import create_engine, Column, String, Integer, Text
+from sqlalchemy import create_engine, Column, String, Integer, Text, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from pyteamcity import TeamCity
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -17,8 +17,9 @@ class DataProblemsStatistics(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     file_name = Column(String)
     column = Column(String)
-    expectation_type = Column(String)
+    expectation_values = Column(String)
     unexpected_values = Column(Text)
+    date_validation = Column(Date)
 
 
 def read_and_validate_file(df):
@@ -111,38 +112,22 @@ def read_and_validate_file(df):
         min_value=0,
         parse_strings_as_datetimes=True,
     )
-    ge_df.expect_column_values_to_be_in_set(
-        column="APPROVED", value_set=[0, 1]
-    )
-
     validation_result = ge_df.validate()
 
     return validation_result
 
 
 def process_file(file_path, folder_b, folder_c):
-    db_url = "postgresql://postgres:121199@localhost/dsp"
+    db_url = "postgresql://postgres:121199@172.21.112.1/dsp"
     df = pd.read_csv(file_path)
     validation_result = read_and_validate_file(df)
 
     if validation_result["success"]:
         store_file_in_folder(file_path, folder_c)
     else:
-        if all(
-            result["success"] is False
-            for result in validation_result["results"]
-        ):
-            store_file_in_folder(file_path, folder_b)
+        store_file_in_folder(file_path, folder_b)
 
-            save_data_problems_statistics(validation_result, db_url)
-
-        else:
-            split_file_and_save_problems(
-                file_path, folder_b, folder_c, validation_result, db_url
-            )
-
-    if not validation_result["success"]:
-        alert_user_with_teams_notification()
+        save_data_problems_statistics(validation_result, file_path, db_url)
 
 
 def store_file_in_folder(file_path, destination_folder):
@@ -152,24 +137,29 @@ def store_file_in_folder(file_path, destination_folder):
     )
 
 
-def save_data_problems_statistics(validation_result, db_url):
+def save_data_problems_statistics(validation_result, file_path, db_url):
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+    logging.info(f"{validation_result}")
 
-    file_name = os.path.basename(validation_result["meta"]["data_asset_name"])
     for result in validation_result["results"]:
         if not result["success"]:
             column = result["expectation_config"]["kwargs"]["column"]
-            expectation_type = result["expectation_config"]["expectation_type"]
-            unexpected_values = str(result["result"]["unexpected_list"])
+            expectation_values = result["expectation_config"]["kwargs"][
+                "value_set"
+            ]
+            unexpected_values = str(
+                result["result"]["partial_unexpected_list"]
+            )
 
             stat = DataProblemsStatistics(
-                file_name=file_name,
+                file_name=file_path,
                 column=column,
-                expectation_type=expectation_type,
+                expectation_values=expectation_values,
                 unexpected_values=unexpected_values,
+                date_validation=datetime.now().strftime("%Y-%m-%d"),
             )
             session.add(stat)
 
@@ -206,10 +196,3 @@ def split_file_and_save_problems(
 
     else:
         store_file_in_folder(file_path, folder_c)
-
-
-def alert_user_with_teams_notification():
-    teamcity = TeamCity()
-    teamcity.post_message(
-        "Data quality issues detected. Check the logs for details."
-    )

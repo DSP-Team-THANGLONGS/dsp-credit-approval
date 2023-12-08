@@ -1,13 +1,8 @@
 from datetime import timedelta
-
 import os
 import glob
-
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-import sys
-
-sys.path.append("../../")
 import data_validation as dv
 
 
@@ -20,7 +15,7 @@ import data_validation as dv
 )
 def validate_data():
     @task
-    def get_data_validation() -> str:
+    def get_data_validation() -> None:
         directory_path = (
             "/home/mdv/dsp-credit-approval/airflow/data/split_data"
         )
