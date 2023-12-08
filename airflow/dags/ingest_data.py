@@ -12,7 +12,7 @@ from airflow.utils.dates import days_ago
     description="Ingest data from a file to another DAG",
     tags=["dsp", "data_ingestion"],
     schedule=timedelta(minutes=2),
-    start_date=days_ago(n=0, hour=1),
+    start_date=days_ago(n=0, hour=0),
 )
 def ingest_data():
     @task
