@@ -167,7 +167,7 @@ def process_file(file_path, folder_b, folder_c):
             )
     os.rename(
         file_path,
-        os.path.dirname(file_path) + "/validated" + os.path.basename(file_path),
+        os.path.dirname(file_path) + "/validated_" + os.path.basename(file_path),
     )
 
 
