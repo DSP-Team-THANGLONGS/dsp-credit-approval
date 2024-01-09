@@ -1,6 +1,5 @@
 import ast
 import json
-import logging
 import os
 from datetime import datetime, timedelta
 
@@ -31,7 +30,7 @@ def predict_data():
             if os.path.isfile(file_path) and file.endswith(".csv"):
                 df = pd.read_csv(file_path)
                 df_list.append(df)
-            os.remove(file_path)
+                os.remove(file_path)
 
         merged_df = pd.concat(df_list, ignore_index=True)
         return merged_df.to_json(orient="records")
@@ -62,13 +61,6 @@ def predict_data():
 
         df["DATE_PREDICTED"] = datetime.now().strftime("%Y-%m-%d")
         df["APPROVED"] = prediction
-
-        filepath = os.path.join(
-            "/home/mdv/dsp-credit-approval/airflow/data/predicted_data",
-            f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv',
-        )
-        logging.info(f"Predicted data to the file: {filepath}")
-        df.to_csv(filepath, index=False)
 
     data_json = check_for_new_data()
     make_prediction(data_json)

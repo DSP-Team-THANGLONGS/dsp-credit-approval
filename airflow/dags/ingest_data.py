@@ -16,9 +16,9 @@ from airflow.utils.dates import days_ago
 )
 def ingest_data():
     @task
-    def get_data_to_ingest_from_local_file() -> str:
+    def get_data_to_ingest_from_local_file():
         nb_rows = 10
-        filepath = "/home/mdv/dsp-credit-approval/airflow/data/external_data.csv"
+        filepath = "/home/mdv/dsp-credit-approval/airflow/data/folder_A/external_data.csv"
         input_data_df = pd.read_csv(filepath)
         logging.info(f"Extract {nb_rows} rows from the file {filepath}")
         data_to_ingest_df = input_data_df.sample(n=nb_rows)
@@ -32,7 +32,7 @@ def ingest_data():
     def save_data(data_to_ingest_json: pd.DataFrame) -> None:
         data_to_ingest_df = pd.read_json(data_to_ingest_json, orient="records")
 
-        filepath = f'/home/mdv/dsp-credit-approval/airflow/data/split_data/{datetime.now().strftime("%Y-%M-%d_%H-%M-%S")}.csv'
+        filepath = f'/home/mdv/dsp-credit-approval/airflow/data/folder_A/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
         logging.info(f"Ingesting data to the file: {filepath}")
         data_to_ingest_df.to_csv(filepath, index=False)
 
