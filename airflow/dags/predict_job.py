@@ -21,19 +21,26 @@ def predict_data():
     @task()
     def check_for_new_data():
         folder_path = os.path.join(
-            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/success"
+            "/home/mdv/dsp-credit-approval/airflow/data/folder_C"
         )
         df_list = []
 
-        for file in os.listdir(folder_path)[:5]:
+        for file in os.listdir(folder_path):
             file_path = os.path.join(folder_path, file)
             if os.path.isfile(file_path) and file.endswith(".csv"):
+                if file.startswith("predicted_"):
+                    continue
                 df = pd.read_csv(file_path)
                 df_list.append(df)
-                os.remove(file_path)
-
-        merged_df = pd.concat(df_list, ignore_index=True)
-        return merged_df.to_json(orient="records")
+                os.rename(
+                    file_path,
+                    folder_path + "/predicted_" + file,
+                )
+        if len(df_list) > 0:
+            merged_df = pd.concat(df_list, ignore_index=True)
+            return merged_df.to_json(orient="records")
+        else:
+            return False
 
     @task
     def make_prediction(data_to_ingest_json):
@@ -63,7 +70,8 @@ def predict_data():
         df["APPROVED"] = prediction
 
     data_json = check_for_new_data()
-    make_prediction(data_json)
+    if data_json:
+        make_prediction(data_json)
 
 
 ingest_data_dag = predict_data()
