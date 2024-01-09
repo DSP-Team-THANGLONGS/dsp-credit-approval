@@ -118,7 +118,6 @@ def read_and_validate_file(df):
 
 
 def process_file(file_path, folder_b, folder_c):
-    db_url = "postgresql://postgres:121199@172.21.112.1/dsp"
     df = pd.read_csv(file_path)
     validation_result = read_and_validate_file(df)
 
@@ -127,7 +126,7 @@ def process_file(file_path, folder_b, folder_c):
     else:
         store_file_in_folder(file_path, folder_b)
 
-        save_data_problems_statistics(validation_result, file_path, db_url)
+        save_data_problems_statistics(validation_result, file_path)
 
 
 def store_file_in_folder(file_path, destination_folder):
@@ -137,7 +136,8 @@ def store_file_in_folder(file_path, destination_folder):
     )
 
 
-def save_data_problems_statistics(validation_result, file_path, db_url):
+def save_data_problems_statistics(validation_result, file_path):
+    db_url = "postgresql://postgres:121199@172.27.0.1/dsp"
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)

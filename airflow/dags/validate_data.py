@@ -16,19 +16,17 @@ import data_validation as dv
 def validate_data():
     @task
     def get_data_validation() -> None:
-        directory_path = (
-            "/home/mdv/dsp-credit-approval/airflow/data/split_data"
-        )
-        success_path = (
-            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/success"
-        )
-        fail_path = (
-            "/home/mdv/dsp-credit-approval/airflow/data/validated_data/fail"
-        )
+        directory_path = "/home/mdv/dsp-credit-approval/airflow/data/folder_A"
+        success_path = "/home/mdv/dsp-credit-approval/airflow/data/folder_B"
+        fail_path = "/home/mdv/dsp-credit-approval/airflow/data/folder_C"
         file_pattern = os.path.join(directory_path, "*.csv")
         file_paths = glob.glob(file_pattern)
 
         for file_path in file_paths:
+            if file_path.endswith("data.csv") or file_path.endswith(
+                "done.csv"
+            ):
+                continue
             dv.process_file(file_path, fail_path, success_path)
 
     get_data_validation()
