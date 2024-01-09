@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Text, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from pyteamcity import TeamCity
 
 Base = declarative_base()
 
@@ -33,13 +34,19 @@ def read_and_validate_file(df):
     ge_df = ge.dataset.PandasDataset(df, expectation_suite=suite)
 
     ge_df.expect_column_values_to_be_in_set(
-        column="CODE_GENDER", value_set=["F", "M"]
+        column="CODE_GENDER",
+        value_set=["F", "M"],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_OWN_CAR", value_set=["Y", "N"]
+        column="FLAG_OWN_CAR",
+        value_set=["Y", "N"],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_OWN_REALTY", value_set=["Y", "N"]
+        column="FLAG_OWN_REALTY",
+        value_set=["Y", "N"],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
         column="NAME_INCOME_TYPE",
@@ -50,6 +57,7 @@ def read_and_validate_file(df):
             "Student",
             "Pensioner",
         ],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
         column="NAME_EDUCATION_TYPE",
@@ -60,6 +68,7 @@ def read_and_validate_file(df):
             "Lower secondary",
             "Academic degree",
         ],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
         column="NAME_FAMILY_STATUS",
@@ -70,6 +79,7 @@ def read_and_validate_file(df):
             "Separated",
             "Widow",
         ],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_in_set(
         column="NAME_HOUSING_TYPE",
@@ -81,36 +91,58 @@ def read_and_validate_file(df):
             "Co-op apartment",
             "Office apartment",
         ],
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_between(
-        column="CNT_CHILDREN", min_value=0
+        column="CNT_CHILDREN",
+        min_value=0,
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_between(
-        column="AMT_INCOME_TOTAL", min_value=0
-    )
-    ge_df.expect_column_values_to_be_between(column="DAYS_BIRTH", max_value=0)
-    ge_df.expect_column_values_to_be_between(
-        column="DAYS_EMPLOYED", max_value=0
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_MOBIL", value_set=[0, 1]
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_WORK_PHONE", value_set=[0, 1]
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_PHONE", value_set=[0, 1]
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_EMAIL", value_set=[0, 1]
+        column="AMT_INCOME_TOTAL",
+        min_value=0,
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_between(
-        column="CNT_FAM_MEMBERS", min_value=0
+        column="DAYS_BIRTH",
+        max_value=0,
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_between(
+        column="DAYS_EMPLOYED",
+        max_value=0,
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_in_set(
+        column="FLAG_MOBIL",
+        value_set=[0, 1],
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_in_set(
+        column="FLAG_WORK_PHONE",
+        value_set=[0, 1],
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_in_set(
+        column="FLAG_PHONE",
+        value_set=[0, 1],
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_in_set(
+        column="FLAG_EMAIL",
+        value_set=[0, 1],
+        result_format={"result_format": "COMPLETE"},
+    )
+    ge_df.expect_column_values_to_be_between(
+        column="CNT_FAM_MEMBERS",
+        min_value=0,
+        result_format={"result_format": "COMPLETE"},
     )
     ge_df.expect_column_values_to_be_between(
         column="CNT_FAM_MEMBERS",
         min_value=0,
         parse_strings_as_datetimes=True,
+        result_format={"result_format": "COMPLETE"},
     )
     validation_result = ge_df.validate()
 
@@ -120,13 +152,23 @@ def read_and_validate_file(df):
 def process_file(file_path, folder_b, folder_c):
     df = pd.read_csv(file_path)
     validation_result = read_and_validate_file(df)
-
     if validation_result["success"]:
         store_file_in_folder(file_path, folder_c)
     else:
-        store_file_in_folder(file_path, folder_b)
+        if all(
+            result["success"] is False
+            for result in validation_result["results"]
+        ):
+            store_file_in_folder(file_path, folder_b)
 
-        save_data_problems_statistics(validation_result, file_path)
+        else:
+            split_file_and_save_problems(
+                file_path, folder_b, folder_c, validation_result
+            )
+    os.rename(
+        file_path,
+        os.path.dirname(file_path) + "/validated" + os.path.basename(file_path),
+    )
 
 
 def store_file_in_folder(file_path, destination_folder):
@@ -168,7 +210,7 @@ def save_data_problems_statistics(validation_result, file_path):
 
 
 def split_file_and_save_problems(
-    file_path, folder_b, folder_c, validation_result, db_url
+    file_path, folder_b, folder_c, validation_result
 ):
     df = pd.read_csv(file_path)
 
@@ -181,7 +223,7 @@ def split_file_and_save_problems(
         df_problems = df.loc[problematic_rows]
         df_no_problems = df.drop(problematic_rows)
 
-        save_data_problems_statistics(validation_result, db_url)
+        # save_data_problems_statistics(validation_result, file_path)
 
         problems_file_path = os.path.join(
             folder_b, f"file_with_data_problems_{os.path.basename(file_path)}"
@@ -196,3 +238,10 @@ def split_file_and_save_problems(
 
     else:
         store_file_in_folder(file_path, folder_c)
+
+
+def alert_user_with_teams_notification():
+    teamcity = TeamCity()
+    teamcity.post_message(
+        "Data quality issues detected. Check the logs for details."
+    )
