@@ -14,7 +14,7 @@ import data_validation as dv
     dag_id="ingest_data",
     description="Ingest data from a file to another DAG",
     tags=["dsp", "data_ingestion", "data_validation"],
-    schedule_interval=timedelta(minutes=5),
+    schedule_interval=timedelta(minutes=2),
     start_date=days_ago(n=0, hour=0),
     catchup=False,
 )
@@ -51,7 +51,6 @@ def ingest_data():
         file_paths = glob.glob(file_pattern)
 
         for file_path in file_paths:
-            print(file_path)
             if file_path.endswith("data.csv") or os.path.basename(
                 file_path
             ).startswith("validated_"):

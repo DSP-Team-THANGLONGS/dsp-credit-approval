@@ -14,7 +14,7 @@ import requests
     dag_id="predict_data",
     description="Ingest data from a file to another DAG",
     tags=["dsp", "data_prediction"],
-    schedule=timedelta(minutes=4),
+    schedule=timedelta(minutes=5),
     start_date=days_ago(n=0, hour=0),
     catchup=False,
 )
@@ -70,14 +70,6 @@ def predict_data():
 
             df["DATE_PREDICTED"] = datetime.now().strftime("%Y-%m-%d")
             df["APPROVED"] = prediction
-
-            # Save the predicted data to a new file
-            df.to_csv(
-                os.path.join(
-                    "/home/mdv/dsp-credit-approval/airflow/data/predicted_data.csv"
-                ),
-                index=False,
-            )
 
     data_json = check_for_new_data()
     make_prediction(data_json)
