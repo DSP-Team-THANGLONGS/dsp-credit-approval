@@ -167,19 +167,21 @@ def process_file(file_path, folder_b, folder_c):
             )
     os.rename(
         file_path,
-        os.path.dirname(file_path) + "/validated_" + os.path.basename(file_path),
+        os.path.dirname(file_path)
+        + "/validated_"
+        + os.path.basename(file_path),
     )
 
 
 def store_file_in_folder(file_path, destination_folder):
-    shutil.move(
+    shutil.copy(
         file_path,
         os.path.join(destination_folder, os.path.basename(file_path)),
     )
 
 
 def save_data_problems_statistics(validation_result, file_path):
-    db_url = "postgresql://postgres:121199@172.27.0.1/dsp"
+    db_url = "postgresql://postgres:121199@172.28.16.1/dsp"
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -188,10 +190,16 @@ def save_data_problems_statistics(validation_result, file_path):
 
     for result in validation_result["results"]:
         if not result["success"]:
+            print("result - 1", result)
             column = result["expectation_config"]["kwargs"]["column"]
-            expectation_values = result["expectation_config"]["kwargs"][
-                "value_set"
-            ]
+            try:
+                expectation_values = result["expectation_config"]["kwargs"][
+                    "value_set"
+                ]
+            except:
+                expectation_values = result["expectation_config"]["kwargs"][
+                    "min_value"
+                ]
             unexpected_values = str(
                 result["result"]["partial_unexpected_list"]
             )
@@ -223,11 +231,11 @@ def split_file_and_save_problems(
         df_problems = df.loc[problematic_rows]
         df_no_problems = df.drop(problematic_rows)
 
-        # save_data_problems_statistics(validation_result, file_path)
-
         problems_file_path = os.path.join(
             folder_b, f"file_with_data_problems_{os.path.basename(file_path)}"
         )
+
+        save_data_problems_statistics(validation_result, problems_file_path)
         df_problems.to_csv(problems_file_path, index=False)
 
         no_problems_file_path = os.path.join(

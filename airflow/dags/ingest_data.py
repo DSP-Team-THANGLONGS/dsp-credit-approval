@@ -14,8 +14,9 @@ import data_validation as dv
     dag_id="ingest_data",
     description="Ingest data from a file to another DAG",
     tags=["dsp", "data_ingestion", "data_validation"],
-    schedule_interval=timedelta(minutes=2),
+    schedule_interval=timedelta(minutes=5),
     start_date=days_ago(n=0, hour=0),
+    catchup=False,
 )
 def ingest_data():
     @task
@@ -57,7 +58,6 @@ def ingest_data():
                 continue
             dv.process_file(file_path, fail_path, success_path)
 
-    # Task relationships
     (save_data(get_data_to_ingest_from_local_file()) >> get_data_validation())
 
 
