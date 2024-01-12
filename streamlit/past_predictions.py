@@ -70,6 +70,7 @@ def past_predictions():
         "occupation": "Occupation",
         "fam_members": "Family member",
         "result": "Result",
+        "platform": "platform",
     }
     df.rename(columns=column_mapping, inplace=True)
     df = df[column_mapping.values()]
