@@ -35,120 +35,45 @@ def read_and_validate_file(df):
 
     ge_df = ge.dataset.PandasDataset(df, expectation_suite=suite)
 
-    ge_df.expect_column_values_to_be_in_set(
-        column="CODE_GENDER",
-        value_set=["F", "M"],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_OWN_CAR",
-        value_set=["Y", "N"],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_OWN_REALTY",
-        value_set=["Y", "N"],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="NAME_INCOME_TYPE",
-        value_set=[
-            "Working",
-            "Commercial associate",
-            "State servant",
-            "Student",
-            "Pensioner",
-        ],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="NAME_EDUCATION_TYPE",
-        value_set=[
-            "Higher education",
-            "Secondary / secondary special",
-            "Incomplete higher",
-            "Lower secondary",
-            "Academic degree",
-        ],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="NAME_FAMILY_STATUS",
-        value_set=[
-            "Civil marriage",
-            "Married",
-            "Single / not married",
-            "Separated",
-            "Widow",
-        ],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="NAME_HOUSING_TYPE",
-        value_set=[
-            "Rented apartment",
-            "House / apartment",
-            "Municipal apartment",
-            "With parents",
-            "Co-op apartment",
-            "Office apartment",
-        ],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="CNT_CHILDREN",
-        min_value=0,
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="AMT_INCOME_TOTAL",
-        min_value=0,
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="DAYS_BIRTH",
-        max_value=0,
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="DAYS_EMPLOYED",
-        max_value=0,
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_MOBIL",
-        value_set=[0, 1],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_WORK_PHONE",
-        value_set=[0, 1],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_PHONE",
-        value_set=[0, 1],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_in_set(
-        column="FLAG_EMAIL",
-        value_set=[0, 1],
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="CNT_FAM_MEMBERS",
-        min_value=0,
-        result_format={"result_format": "COMPLETE"},
-    )
-    ge_df.expect_column_values_to_be_between(
-        column="CNT_FAM_MEMBERS",
-        min_value=0,
-        parse_strings_as_datetimes=True,
-        result_format={"result_format": "COMPLETE"},
-    )
+    columns_to_check = [
+        ("CODE_GENDER", ["F", "M"]),
+        ("FLAG_OWN_CAR", ["Y", "N"]),
+        ("FLAG_OWN_REALTY", ["Y", "N"]),
+        ("NAME_INCOME_TYPE", ["Working", "Commercial associate", "State servant", "Student", "Pensioner"]),
+        ("NAME_EDUCATION_TYPE", ["Higher education", "Secondary / secondary special", "Incomplete higher", "Lower secondary", "Academic degree"]),
+        ("NAME_FAMILY_STATUS", ["Civil marriage", "Married", "Single / not married", "Separated", "Widow"]),
+        ("NAME_HOUSING_TYPE", ["Rented apartment", "House / apartment", "Municipal apartment", "With parents", "Co-op apartment", "Office apartment"]),
+        ("CNT_CHILDREN", None, 0),
+        ("AMT_INCOME_TOTAL", None, 0),
+        ("DAYS_BIRTH", None, None, 0),
+        ("DAYS_EMPLOYED", None, None, 0),
+        ("FLAG_MOBIL", [0, 1]),
+        ("FLAG_WORK_PHONE", [0, 1]),
+        ("FLAG_PHONE", [0, 1]),
+        ("FLAG_EMAIL", [0, 1]),
+        ("CNT_FAM_MEMBERS", None, 0),
+        ("CNT_FAM_MEMBERS", None, 0, True),
+    ]
+
+    for column, value_set, min_value, max_value, parse_strings_as_datetimes in columns_to_check:
+        expectation_args = {"result_format": "COMPLETE"}
+
+        if value_set is not None:
+            ge_df.expect_column_values_to_be_in_set(column=column, value_set=value_set, **expectation_args)
+
+        if min_value is not None:
+            ge_df.expect_column_values_to_be_between(column=column, min_value=min_value, **expectation_args)
+
+        if max_value is not None:
+            ge_df.expect_column_values_to_be_between(column=column, max_value=max_value, **expectation_args)
+
+        if parse_strings_as_datetimes:
+            ge_df.expect_column_values_to_be_between(column=column, parse_strings_as_datetimes=True, **expectation_args)
+
     validation_result = ge_df.validate()
 
     return validation_result
+
 
 
 def process_file(file_path, folder_b, folder_c):

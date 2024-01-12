@@ -51,13 +51,11 @@ def ingest_data():
         file_paths = glob.glob(file_pattern)
 
         for file_path in file_paths:
-            if file_path.endswith("data.csv") or os.path.basename(
-                file_path
-            ).startswith("validated_"):
+            if os.path.basename(file_path).startswith("validated_"):
                 continue
             dv.process_file(file_path, fail_path, success_path)
 
-    (save_data(get_data_to_ingest_from_local_file()) >> get_data_validation())
+    save_data(get_data_to_ingest_from_local_file()) >> get_data_validation()
 
 
 ingest_data_dag = ingest_data()

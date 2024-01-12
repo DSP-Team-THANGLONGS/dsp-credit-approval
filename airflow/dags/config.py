@@ -1,2 +1,3 @@
-URL_PREDICT = "http://172.21.240.1:8000/predict"
-URL_GET_PREDICTIONS = "http://192.168.1.54:8000/get-predictions"
+HOST = "172.21.240.1"
+URL_PREDICT = f"http://{HOST}:8000/predict"
+URL_GET_PREDICTIONS = f"http://{HOST}:8000/get-predictions"
