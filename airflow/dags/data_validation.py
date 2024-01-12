@@ -3,11 +3,13 @@ import great_expectations as ge
 import shutil
 import os
 import pandas as pd
-from sqlalchemy import create_engine, Column, String, Integer, Text, Date
+from sqlalchemy import create_engine, Column, String, Integer, Text, Date, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-from pyteamcity import TeamCity
+
+import smtplib
+from email.mime.text import MIMEText
 
 Base = declarative_base()
 
@@ -20,7 +22,7 @@ class DataProblemsStatistics(Base):
     column = Column(String)
     expectation_values = Column(String)
     unexpected_values = Column(Text)
-    date_validation = Column(Date)
+    date_validation = Column(DateTime)
 
 
 def read_and_validate_file(df):
@@ -181,25 +183,23 @@ def store_file_in_folder(file_path, destination_folder):
 
 
 def save_data_problems_statistics(validation_result, file_path):
-    db_url = "postgresql://postgres:121199@172.28.16.1/dsp"
+    db_url = "postgresql://postgres:121199@172.21.240.1/dsp"
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    logging.info(f"{validation_result}")
 
     for result in validation_result["results"]:
         if not result["success"]:
-            print("result - 1", result)
             column = result["expectation_config"]["kwargs"]["column"]
             try:
                 expectation_values = result["expectation_config"]["kwargs"][
                     "value_set"
                 ]
             except:
-                expectation_values = result["expectation_config"]["kwargs"][
-                    "min_value"
-                ]
+                expectation_values = "greater than " + str(
+                    result["expectation_config"]["kwargs"]["min_value"]
+                )
             unexpected_values = str(
                 result["result"]["partial_unexpected_list"]
             )
@@ -209,8 +209,10 @@ def save_data_problems_statistics(validation_result, file_path):
                 column=column,
                 expectation_values=expectation_values,
                 unexpected_values=unexpected_values,
-                date_validation=datetime.now().strftime("%Y-%m-%d"),
+                date_validation=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             )
+            data_problems = [column, expectation_values, unexpected_values]
+            alert_user_with_email_notification(file_path, data_problems)
             session.add(stat)
 
     session.commit()
@@ -244,12 +246,30 @@ def split_file_and_save_problems(
         )
         df_no_problems.to_csv(no_problems_file_path, index=False)
 
-    else:
-        store_file_in_folder(file_path, folder_c)
+
+def send_email_notification(sender, recipient, subject, message):
+    # Create the message
+    message = MIMEText(message)
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = recipient
+
+    # Establish a connection with the SMTP server
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login("ducminhvu2022@gmail.com", "otqt hqpw wqwo hhvm")
+        server.sendmail(sender, recipient, message.as_string())
 
 
-def alert_user_with_teams_notification():
-    teamcity = TeamCity()
-    teamcity.post_message(
-        "Data quality issues detected. Check the logs for details."
+def alert_user_with_email_notification(file_path, val_rs):
+    sender = "ducminhvu2022@gmail.com"
+    recipient = "minhducvu1211@gmail.com"
+    subject = "Data Quality Issues"
+    message = (
+        f"File: {file_path} have problems\n"
+        + f"Detail: \n"
+        + f"Column          |   Expected value  |   True Value \n"
+        + f"{val_rs[0]}     |   {val_rs[1]}     |   {val_rs[2]}"
     )
+
+    send_email_notification(sender, recipient, subject, message)

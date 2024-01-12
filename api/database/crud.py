@@ -5,13 +5,11 @@ from . import models
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy import cast, Float
 
 register_adapter(np.int64, AsIs)
 
 
-def get_records(db: Session, limit: int = 100):
+def get_records(db: Session, limit: int = 10000):
     records = db.query(models.Records).limit(limit).all()
     return records
 
@@ -19,7 +17,6 @@ def get_records(db: Session, limit: int = 100):
 def save_record(db: Session, records: dict):
     # Assuming all lists have the same length
     num_records = len(records["own_car"])
-
     # Create a list to hold the Records objects
     db_records = []
     for i in range(num_records):

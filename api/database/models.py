@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Date, Integer, String, Float, Boolean
+from sqlalchemy import Column, Date, Integer, String, Float, Boolean, DateTime
 
 
 class Records(Base):
@@ -18,5 +18,5 @@ class Records(Base):
     occupation = Column(String, index=True)
     fam_members = Column(Integer)
     result = Column(Integer)
-    date_prediction = Column(Date)
+    date_prediction = Column(DateTime)
     platform = Column(String, index=True)
