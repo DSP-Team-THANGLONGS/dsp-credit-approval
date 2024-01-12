@@ -11,10 +11,10 @@ def past_predictions():
     res = requests.get(config.URL_GET_PREDICTIONS)
     data = res.json()
     df = pd.DataFrame(data)
-
     df["date_prediction"] = pd.to_datetime(
-        df["date_prediction"], format="%Y-%m-%d"
-    ).dt.date
+        df["date_prediction"], format="%Y-%m-%d %H:%M:%S"
+    ).dt.strftime("%Y-%m-%d %H:%M:%S")
+
     df["result"] = df["result"].replace({1: "Good", 0: "Bad"})
     df["income"] = df["income"].round(2)
 
@@ -44,8 +44,14 @@ def past_predictions():
     # Filter the DataFrame based on user selections
     filter_conditions = (
         (
-            (df["date_prediction"] >= start_date)
-            & (df["date_prediction"] <= end_date)
+            (
+                pd.to_datetime(df["date_prediction"]).dt.date
+                >= pd.to_datetime(start_date)
+            )
+            & (
+                pd.to_datetime(df["date_prediction"]).dt.date
+                <= pd.to_datetime(end_date)
+            )
             if start_date and end_date
             else True
         )
@@ -58,6 +64,7 @@ def past_predictions():
     # Rename columns
     column_mapping = {
         "date_prediction": "Date of prediction",
+        "platform": "Platform",
         "own_car": "Car Owner",
         "own_realty": "Realty Owner",
         "income": "Income Total",
@@ -70,7 +77,6 @@ def past_predictions():
         "occupation": "Occupation",
         "fam_members": "Family member",
         "result": "Result",
-        "platform": "platform",
     }
     df.rename(columns=column_mapping, inplace=True)
     df = df[column_mapping.values()]

@@ -5,13 +5,11 @@ from . import models
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy import cast, Float
 
 register_adapter(np.int64, AsIs)
 
 
-def get_records(db: Session, limit: int = 100):
+def get_records(db: Session, limit: int = 10000):
     records = db.query(models.Records).limit(limit).all()
     return records
 
@@ -38,7 +36,6 @@ def save_record(db: Session, records: dict):
             platform=records["platform"][i],
             date_prediction=records["date_prediction"][i],
         )
-        print(records["date_prediction"][i])
         db_records.append(db_record)
     db.add_all(db_records)
     db.commit()

@@ -193,16 +193,9 @@ def handle_form_input():
             }
         ]
         res = requests.post(config.URL_PREDICT, data=json.dumps(data))
-        input_list = (res.text).strip("[]").split(",")
-        result_list = [
-            int(item.strip('"'))
-            if item.strip('"').isdigit()
-            else float(item.strip('"'))
-            if "." in item
-            else item.strip('"')
-            for item in input_list
-        ]
-        is_good_applicant = "good" if result_list[0] == 1 else "bad"
+        prediction_str = res.json()
+        prediction = ast.literal_eval(prediction_str)
+        is_good_applicant = "good" if prediction[0] == 1 else "bad"
         result = f"This profile is a {is_good_applicant} applicants"
         st.write(result)
 
@@ -229,7 +222,7 @@ def handle_csv_input():
                     "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
                     "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
                     "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
-                    "PLATFORM": "App",
+                    "PLATFORM": "APP",
                 }
             )
         response = requests.post(config.URL_PREDICT, data=json.dumps(data))

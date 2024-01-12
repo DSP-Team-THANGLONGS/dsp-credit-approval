@@ -32,11 +32,9 @@ async def save_predict(
 ) -> bool:
     # Calculate today's date
     today = datetime.datetime.now().date()
-
     # Convert "DAYS_BIRTH" and "DAYS_EMPLOYED" columns to absolute values
     data["DAYS_BIRTH"] = np.abs(data["DAYS_BIRTH"])
-    data["DAYS_EMPLOYED"] = np.abs(data["DAYS_EMPLOYED"])
-
+    data["DAYS_EMPLOYED"] = data["DAYS_EMPLOYED"]
     # Calculate birthday and employed day
     data["DAYS_BIRTH"] = data["DAYS_BIRTH"].apply(
         lambda x: today - pd.to_timedelta(x, unit="D")
@@ -44,9 +42,8 @@ async def save_predict(
     data["EMPLOYED_DAY"] = data["DAYS_EMPLOYED"].apply(
         lambda x: today - pd.to_timedelta(x, unit="D")
     )
-
     # Determine if still working
-    data["STILL_WORKING"] = data["DAYS_EMPLOYED"] < 0
+    data["STILL_WORKING"] = data["DAYS_EMPLOYED"][0] < 0
 
     # Create the record DataFrame
     records = {
