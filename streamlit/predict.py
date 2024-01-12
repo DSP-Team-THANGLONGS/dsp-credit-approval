@@ -222,7 +222,7 @@ def handle_csv_input():
                     "DAYS_EMPLOYED": row["DAYS_EMPLOYED"],
                     "OCCUPATION_TYPE": row["OCCUPATION_TYPE"],
                     "CNT_FAM_MEMBERS": row["CNT_FAM_MEMBERS"],
-                    "PLATFORM": "APP",
+                    "PLATFORM": "App",
                 }
             )
         response = requests.post(config.URL_PREDICT, data=json.dumps(data))
