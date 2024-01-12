@@ -16,7 +16,7 @@ class RecordsBase(BaseModel):
     fam_members: int
     result: int
     platform: str
-    date_prediction: datetime.date
+    date_prediction: datetime
 
 
 class RecordCreate(RecordsBase):
@@ -33,7 +33,7 @@ class RecordCreate(RecordsBase):
     fam_members: int
     result: int
     platform: str
-    date_prediction: datetime.date
+    date_prediction: datetime
 
 
 class Record(RecordsBase):
@@ -50,7 +50,7 @@ class Record(RecordsBase):
     fam_members: int
     result: int
     platform: str
-    date_prediction: datetime.date
+    date_prediction: datetime
 
     class Config:
         from_attributes = True

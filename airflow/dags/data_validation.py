@@ -3,7 +3,7 @@ import great_expectations as ge
 import shutil
 import os
 import pandas as pd
-from sqlalchemy import create_engine, Column, String, Integer, Text, Date
+from sqlalchemy import create_engine, Column, String, Integer, Text, Date, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -22,7 +22,7 @@ class DataProblemsStatistics(Base):
     column = Column(String)
     expectation_values = Column(String)
     unexpected_values = Column(Text)
-    date_validation = Column(Date)
+    date_validation = Column(DateTime)
 
 
 def read_and_validate_file(df):
@@ -183,7 +183,7 @@ def store_file_in_folder(file_path, destination_folder):
 
 
 def save_data_problems_statistics(validation_result, file_path):
-    db_url = "postgresql://postgres:121199@172.28.16.1/dsp"
+    db_url = "postgresql://postgres:121199@172.21.240.1/dsp"
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -209,7 +209,7 @@ def save_data_problems_statistics(validation_result, file_path):
                 column=column,
                 expectation_values=expectation_values,
                 unexpected_values=unexpected_values,
-                date_validation=datetime.now().strftime("%Y-%m-%d"),
+                date_validation=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             )
             data_problems = [column, expectation_values, unexpected_values]
             alert_user_with_email_notification(file_path, data_problems)
