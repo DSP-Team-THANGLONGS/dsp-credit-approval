@@ -63,7 +63,10 @@ async def save_predict(
         "fam_members": data["CNT_FAM_MEMBERS"].tolist(),
         "result": data["RESULT"].tolist(),
         "platform": data["PLATFORM"].tolist(),
-        "date_prediction": [today.strftime("%Y-%m-%d %H:%M:%S")] * len(data),
+        "date_prediction": [
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ]
+        * len(data),
     }
     db_record = crud.save_record(db=db, records=records)
     return db_record

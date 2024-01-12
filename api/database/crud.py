@@ -19,7 +19,6 @@ def get_records(db: Session, limit: int = 100):
 def save_record(db: Session, records: dict):
     # Assuming all lists have the same length
     num_records = len(records["own_car"])
-
     # Create a list to hold the Records objects
     db_records = []
     for i in range(num_records):
@@ -39,6 +38,7 @@ def save_record(db: Session, records: dict):
             platform=records["platform"][i],
             date_prediction=records["date_prediction"][i],
         )
+        print(records["date_prediction"][i])
         db_records.append(db_record)
     db.add_all(db_records)
     db.commit()
